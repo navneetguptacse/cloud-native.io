@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps Handbook &amp; Interactive Cheatsheet</title>
+    <meta
+      name="description"
+      content="Production-grade interactive DevOps cheatsheet covering Kubernetes, Minikube, Docker Swarm, VMware Fusion, and SSH automation."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top-navbar">
+      <a href="#" class="brand-container">
+        <svg
+          class="brand-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          fill="currentColor"
+        >
+          <path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/>
+        </svg>
+        <span class="brand-title">
+          <span class="brand-name">cloud-native.io</span>
+          <span class="badge-tag">Handbook</span>
+        </span>
+      </a>
+
+      <div class="search-box-container">
+        <svg
+          class="search-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="square"
+            stroke-linejoin="miter"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          ></path>
+        </svg>
+        <input
+          type="text"
+          id="globalSearchInput"
+          class="search-input"
+          placeholder="Search commands, flags, topics... (Press '/' to focus)"
+          aria-label="Search commands"
+        />
+        <span class="search-shortcut-hint">/</span>
+      </div>
+
+      <div class="nav-actions">
+        <button
+          id="quickCoreBtn"
+          class="btn-primary-action"
+          title="Copy Essential Daily Commands"
+        >
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            ></path>
+          </svg>
+          Quick Core
+        </button>
+
+        <button
+          id="favToggleHeaderBtn"
+          class="btn-icon"
+          aria-label="Toggle Favorites"
+          title="Toggle Favorites View"
+        >
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              stroke-width="2"
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+            ></path>
+          </svg>
+        </button>
+
+        <button
+          id="themeToggleBtn"
+          class="btn-icon"
+          aria-label="Toggle Theme"
+          title="Toggle Dark/Light Mode"
+        >
+          <svg
+            id="themeIconDark"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            ></path>
+          </svg>
+          <svg
+            id="themeIconLight"
+            style="display: none"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+        </button>
+
+        <a
+          href="https://github.com/navneetguptacse/devops.io"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-icon"
+          aria-label="GitHub Repository"
+          title="GitHub Repository"
+        >
+          <svg
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+            ></path>
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <nav class="recipes-bar-wrapper">
+      <div class="recipes-container">
+        <div id="recipeChipsContainer" style="display: flex; gap: 8px"></div>
+      </div>
+    </nav>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="sidebar-group">
+          <label for="groupNavSelect" class="sidebar-label">
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="square"
+                stroke-linejoin="miter"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h7"
+              ></path>
+            </svg>
+            Workflow Groups
+          </label>
+          <select id="groupNavSelect" class="sidebar-select">
+            <option value="all">All Workflows</option>
+          </select>
+        </div>
+
+        <div class="sidebar-group">
+          <label for="sectionJumpSelect" class="sidebar-label">
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="square"
+                stroke-linejoin="miter"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+            Jump to Section
+          </label>
+          <select id="sectionJumpSelect" class="sidebar-select">
+            <option value="">-- Select Section --</option>
+          </select>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <section class="header-banner">
+          <div class="banner-info">
+            <h1 id="bannerTitle" class="banner-title">
+              DevOps Infrastructure Cheat Sheet
+            </h1>
+            <p id="bannerDesc" class="banner-desc">
+              Complete interactive command guide for Kubernetes, Minikube,
+              Swarm, VMware, and SSH setups.
+            </p>
+          </div>
+
+          <div class="view-switcher-group">
+            <button
+              id="viewGridBtn"
+              class="view-btn active"
+              title="Cards Grid View"
+            >
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="square"
+                  stroke-linejoin="miter"
+                  stroke-width="2"
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                ></path>
+              </svg>
+              Grid
+            </button>
+            <button
+              id="viewTableBtn"
+              class="view-btn"
+              title="Compact Table View"
+            >
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="square"
+                  stroke-linejoin="miter"
+                  stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                ></path>
+              </svg>
+              Table
+            </button>
+          </div>
+        </section>
+
+        <section id="commandCardsContainer" class="cards-grid"></section>
+
+        <section
+          id="commandTableContainer"
+          class="table-wrapper"
+          style="display: none"
+        >
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th style="width: 60px">S/U</th>
+                <th>Command Title</th>
+                <th>Code Syntax</th>
+                <th>Description</th>
+                <th style="width: 70px">Action</th>
+              </tr>
+            </thead>
+            <tbody id="commandTableBody"></tbody>
+          </table>
+        </section>
+
+        <section id="emptyState" class="empty-state" style="display: none">
+          <svg
+            class="empty-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              stroke-width="2"
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <h3 class="empty-title">No Commands Found</h3>
+          <p class="empty-desc">
+            No commands matched your search criteria. Try searching for a
+            different keyword or resetting your category filter.
+          </p>
+        </section>
+
+        <section class="generator-card">
+          <div class="generator-header">
+            <svg
+              class="generator-icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="square"
+                stroke-linejoin="miter"
+                stroke-width="2"
+                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              ></path>
+            </svg>
+            <h2 class="generator-title">Interactive Command Generator</h2>
+          </div>
+
+          <div class="generator-grid">
+            <div class="form-group">
+              <label for="genType" class="form-label">Command Type</label>
+              <select id="genType" class="sidebar-select">
+                <option value="k8s-init">K8s Control Plane Init</option>
+                <option value="k8s-join">K8s Worker Join</option>
+                <option value="swarm-create">Swarm Service Create</option>
+                <option value="vm-start">VMware Start VM</option>
+                <option value="ssh-connect">SSH Private Key Login</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="genIp" class="form-label">Host / Master IP</label>
+              <input
+                type="text"
+                id="genIp"
+                class="form-input"
+                value="192.168.64.10"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="genParam" class="form-label"
+                >Key Path / VMX Path / Service</label
+              >
+              <input
+                type="text"
+                id="genParam"
+                class="form-input"
+                value="/Users/username/Downloads/ssh-key"
+              />
+            </div>
+          </div>
+
+          <div class="generator-output-box">
+            <div class="output-prompt-container">
+              <span class="output-prompt-icon">&gt;_</span>
+              <code id="generatorOutputText"
+                >ssh -i /Users/username/Downloads/ssh-key
+                root@192.168.64.10</code
+              >
+            </div>
+            <button
+              id="genCopyBtn"
+              class="btn-copy-code"
+              title="Copy Generated Command"
+            >
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="square"
+                  stroke-linejoin="miter"
+                  stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      <span>DevOps Handbook &amp; Infrastructure Automation Cheatsheet</span>
+      <span>MIT License &bull; Navneet Gupta</span>
+    </footer>
+
+    <div id="toastNotice" class="toast">
+      <svg
+        width="18"
+        height="18"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          stroke-linecap="square"
+          stroke-linejoin="miter"
+          stroke-width="2"
+          d="M5 13l4 4L19 7"
+        ></path>
+      </svg>
+      <span id="toastMessage">Copied!</span>
+    </div>
+
+    <script>
+      (function () {
+        let state = {
+          data: null,
+          activeGroup: "all",
+          activeSection: "",
+          searchQuery: "",
+          viewMode: "grid",
+          bookmarks: JSON.parse(
+            localStorage.getItem("devops_bookmarks") || "[]",
+          ),
+        };
+
+        const dom = {
+          groupNavSelect: document.getElementById("groupNavSelect"),
+          sectionJumpSelect: document.getElementById("sectionJumpSelect"),
+          globalSearchInput: document.getElementById("globalSearchInput"),
+          recipeChipsContainer: document.getElementById("recipeChipsContainer"),
+          bannerTitle: document.getElementById("bannerTitle"),
+          bannerDesc: document.getElementById("bannerDesc"),
+          commandCardsContainer: document.getElementById(
+            "commandCardsContainer",
+          ),
+          commandTableContainer: document.getElementById(
+            "commandTableContainer",
+          ),
+          commandTableBody: document.getElementById("commandTableBody"),
+          emptyState: document.getElementById("emptyState"),
+          favToggleHeaderBtn: document.getElementById("favToggleHeaderBtn"),
+          viewGridBtn: document.getElementById("viewGridBtn"),
+          viewTableBtn: document.getElementById("viewTableBtn"),
+          themeToggleBtn: document.getElementById("themeToggleBtn"),
+          themeIconDark: document.getElementById("themeIconDark"),
+          themeIconLight: document.getElementById("themeIconLight"),
+          quickCoreBtn: document.getElementById("quickCoreBtn"),
+          genType: document.getElementById("genType"),
+          genIp: document.getElementById("genIp"),
+          genParam: document.getElementById("genParam"),
+          generatorOutputText: document.getElementById("generatorOutputText"),
+          genCopyBtn: document.getElementById("genCopyBtn"),
+          toastNotice: document.getElementById("toastNotice"),
+          toastMessage: document.getElementById("toastMessage"),
+        };
+
+        fetch("commands.json")
+          .then((res) => res.json())
+          .then((data) => {
+            state.data = data;
+            initApp();
+          });
+
+        function initApp() {
+          populateSidebarDropdowns();
+          renderRecipes();
+          renderCommands();
+          setupEventListeners();
+          updateGeneratorOutput();
+        }
+
+        function populateSidebarDropdowns() {
+          dom.groupNavSelect.innerHTML =
+            '<option value="all">All Workflows</option>';
+          state.data.groups.forEach((g) => {
+            const count = state.data.commands.filter(
+              (c) => c.groupId === g.id,
+            ).length;
+            const opt = document.createElement("option");
+            opt.value = g.id;
+            opt.textContent = g.name + " (" + count + ")";
+            dom.groupNavSelect.appendChild(opt);
+          });
+
+          const favOpt = document.createElement("option");
+          favOpt.value = "bookmarks";
+          favOpt.textContent = "Bookmarks (" + state.bookmarks.length + ")";
+          dom.groupNavSelect.appendChild(favOpt);
+
+          updateSectionDropdown("all");
+        }
+
+        function updateSectionDropdown(groupId) {
+          dom.sectionJumpSelect.innerHTML =
+            '<option value="">-- Select Section --</option>';
+          let secList = state.data.sections;
+          if (groupId !== "all" && groupId !== "bookmarks") {
+            secList = secList.filter((s) => s.groupId === groupId);
+          }
+          secList.forEach((s) => {
+            const opt = document.createElement("option");
+            opt.value = s.id;
+            opt.textContent = s.title;
+            dom.sectionJumpSelect.appendChild(opt);
+          });
+        }
+
+        function renderRecipes() {
+          dom.recipeChipsContainer.innerHTML = "";
+          state.data.recipes.forEach((r) => {
+            const chip = document.createElement("button");
+            chip.className = "recipe-chip";
+            chip.innerHTML =
+              '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>' +
+              r.title;
+            chip.onclick = () => {
+              state.activeGroup = "all";
+              state.activeSection = "";
+              state.searchQuery = r.query;
+              dom.groupNavSelect.value = "all";
+              dom.sectionJumpSelect.value = "";
+              dom.globalSearchInput.value = r.query;
+              updateSectionDropdown("all");
+              renderCommands();
+            };
+            dom.recipeChipsContainer.appendChild(chip);
+          });
+        }
+
+        function filterCommands() {
+          let list = state.data.commands;
+
+          if (state.activeGroup === "bookmarks") {
+            list = list.filter((c) => state.bookmarks.includes(c.id));
+          } else if (state.activeGroup !== "all") {
+            list = list.filter((c) => c.groupId === state.activeGroup);
+          }
+
+          if (state.activeSection) {
+            list = list.filter((c) => c.sectionId === state.activeSection);
+          }
+
+          if (state.searchQuery.trim() !== "") {
+            const q = state.searchQuery.toLowerCase();
+            list = list.filter(
+              (c) =>
+                c.title.toLowerCase().includes(q) ||
+                c.command.toLowerCase().includes(q) ||
+                c.description.toLowerCase().includes(q) ||
+                c.tags.some((t) => t.toLowerCase().includes(q)),
+            );
+          }
+
+          return list;
+        }
+
+        function renderCommands() {
+          const filtered = filterCommands();
+
+          if (state.activeGroup === "bookmarks") {
+            dom.bannerTitle.textContent = "Bookmarked Commands";
+            dom.bannerDesc.textContent =
+              "Your saved favorite commands for quick reference.";
+          } else if (state.activeSection) {
+            const secObj = state.data.sections.find(
+              (s) => s.id === state.activeSection,
+            );
+            dom.bannerTitle.textContent = secObj
+              ? secObj.title
+              : "Section Commands";
+            dom.bannerDesc.textContent = secObj ? secObj.description : "";
+          } else if (state.activeGroup !== "all") {
+            const grpObj = state.data.groups.find(
+              (g) => g.id === state.activeGroup,
+            );
+            dom.bannerTitle.textContent = grpObj
+              ? grpObj.name
+              : "Category Commands";
+            dom.bannerDesc.textContent = grpObj ? grpObj.description : "";
+          } else {
+            dom.bannerTitle.textContent = "DevOps Infrastructure Cheat Sheet";
+            dom.bannerDesc.textContent =
+              "Complete interactive command guide for Kubernetes, Minikube, Swarm, VMware, and SSH setups.";
+          }
+
+          if (filtered.length === 0) {
+            dom.commandCardsContainer.style.display = "none";
+            dom.commandTableContainer.style.display = "none";
+            dom.emptyState.style.display = "flex";
+            return;
+          }
+
+          dom.emptyState.style.display = "none";
+
+          if (state.viewMode === "grid") {
+            dom.commandTableContainer.style.display = "none";
+            dom.commandCardsContainer.style.display = "grid";
+            renderGridCards(filtered);
+          } else {
+            dom.commandCardsContainer.style.display = "none";
+            dom.commandTableContainer.style.display = "block";
+            renderTableRows(filtered);
+          }
+        }
+
+        function renderGridCards(list) {
+          dom.commandCardsContainer.innerHTML = "";
+          list.forEach((c) => {
+            const isBookmarked = state.bookmarks.includes(c.id);
+            const card = document.createElement("div");
+            card.className = "command-card";
+            card.innerHTML = `
+            <div class="card-header">
+              <h3 class="card-title">${c.title}</h3>
+              <button class="bookmark-btn ${isBookmarked ? "active" : ""}" onclick="toggleBookmark('${c.id}')" title="Bookmark Command">
+                <svg fill="${isBookmarked ? "currentColor" : "none"}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="card-desc">${c.description}</p>
+            <div class="code-box">
+              <span class="code-text">${c.codeHighlight || c.command}</span>
+              <button class="btn-copy-code" data-id="${c.id}" title="Copy Code">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+          `;
+            dom.commandCardsContainer.appendChild(card);
+          });
+        }
+
+        function renderTableRows(list) {
+          dom.commandTableBody.innerHTML = "";
+          list.forEach((c) => {
+            const isBookmarked = state.bookmarks.includes(c.id);
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td>
+              <button class="bookmark-btn ${isBookmarked ? "active" : ""}" onclick="toggleBookmark('${c.id}')" title="Bookmark Command">
+                <svg fill="${isBookmarked ? "currentColor" : "none"}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
+              </button>
+            </td>
+            <td>${c.title}</td>
+            <td class="col-cmd"><code>${c.command}</code></td>
+            <td>${c.description}</td>
+            <td>
+              <button class="btn-copy-code" data-id="${c.id}" title="Copy Code">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </td>
+          `;
+            dom.commandTableBody.appendChild(tr);
+          });
+        }
+
+        function setupEventListeners() {
+          dom.groupNavSelect.onchange = (e) => {
+            state.activeGroup = e.target.value;
+            state.activeSection = "";
+            if (state.activeGroup === "bookmarks") {
+              dom.favToggleHeaderBtn.classList.add("active");
+            } else {
+              dom.favToggleHeaderBtn.classList.remove("active");
+            }
+            updateSectionDropdown(state.activeGroup);
+            renderCommands();
+          };
+
+          dom.sectionJumpSelect.onchange = (e) => {
+            state.activeSection = e.target.value;
+            if (state.activeSection !== "") {
+              const sec = state.data.sections.find(
+                (s) => s.id === state.activeSection,
+              );
+              if (sec && state.activeGroup !== sec.groupId) {
+                state.activeGroup = sec.groupId;
+                dom.groupNavSelect.value = sec.groupId;
+                dom.favToggleHeaderBtn.classList.remove("active");
+                updateSectionDropdown(sec.groupId);
+                dom.sectionJumpSelect.value = state.activeSection;
+              }
+            }
+            renderCommands();
+          };
+
+          dom.favToggleHeaderBtn.onclick = () => {
+            if (state.activeGroup === "bookmarks") {
+              state.activeGroup = state.previousGroup || "all";
+              state.activeSection = "";
+              dom.favToggleHeaderBtn.classList.remove("active");
+            } else {
+              state.previousGroup = state.activeGroup;
+              state.activeGroup = "bookmarks";
+              state.activeSection = "";
+              dom.favToggleHeaderBtn.classList.add("active");
+            }
+            dom.groupNavSelect.value = state.activeGroup;
+            updateSectionDropdown(state.activeGroup);
+            dom.sectionJumpSelect.value = "";
+            renderCommands();
+          };
+
+          dom.globalSearchInput.oninput = (e) => {
+            state.searchQuery = e.target.value;
+            renderCommands();
+          };
+
+          window.onkeydown = (e) => {
+            if (
+              e.key === "/" &&
+              document.activeElement !== dom.globalSearchInput
+            ) {
+              e.preventDefault();
+              dom.globalSearchInput.focus();
+            } else if (
+              e.key === "Escape" &&
+              document.activeElement === dom.globalSearchInput
+            ) {
+              dom.globalSearchInput.value = "";
+              state.searchQuery = "";
+              dom.globalSearchInput.blur();
+              renderCommands();
+            }
+          };
+
+          dom.viewGridBtn.onclick = () => {
+            state.viewMode = "grid";
+            dom.viewGridBtn.classList.add("active");
+            dom.viewTableBtn.classList.remove("active");
+            renderCommands();
+          };
+
+          document.addEventListener("click", (e) => {
+            const copyBtn = e.target.closest(".btn-copy-code");
+            if (copyBtn && copyBtn.hasAttribute("data-id")) {
+              const cmdId = copyBtn.getAttribute("data-id");
+              const cmdObj = state.data.commands.find((c) => c.id === cmdId);
+              if (cmdObj) {
+                copyToClipboard(cmdObj.command);
+              }
+            }
+          });
+
+          dom.viewTableBtn.onclick = () => {
+            state.viewMode = "table";
+            dom.viewTableBtn.classList.add("active");
+            dom.viewGridBtn.classList.remove("active");
+            renderCommands();
+          };
+
+          dom.themeToggleBtn.onclick = () => {
+            const html = document.documentElement;
+            if (html.classList.contains("light")) {
+              html.classList.remove("light");
+              dom.themeIconDark.style.display = "block";
+              dom.themeIconLight.style.display = "none";
+            } else {
+              html.classList.add("light");
+              dom.themeIconDark.style.display = "none";
+              dom.themeIconLight.style.display = "block";
+            }
+          };
+
+          dom.quickCoreBtn.onclick = () => {
+            const coreCmds = [
+              "sudo kubeadm init --apiserver-advertise-address=192.168.64.10 --pod-network-cidr=10.244.0.0/16",
+              "minikube start --driver=docker",
+              "docker swarm init",
+              'vmrun -T fusion start "/Users/username/Virtual Machines.localized/Ubuntu 24.04 LTS M1.vmwarevm/Ubuntu 24.04 LTS M1.vmx" nogui',
+              "ssh -i /Users/username/Downloads/ssh-key root@192.168.64.10",
+            ].join("\n\n");
+            copyToClipboard(coreCmds);
+            showToast("Copied Quick Core Commands!");
+          };
+
+          dom.genType.onchange = updateGeneratorOutput;
+          dom.genIp.oninput = updateGeneratorOutput;
+          dom.genParam.oninput = updateGeneratorOutput;
+
+          dom.genCopyBtn.onclick = () => {
+            copyToClipboard(dom.generatorOutputText.textContent);
+          };
+        }
+
+        function updateGeneratorOutput() {
+          const type = dom.genType.value;
+          const ip = dom.genIp.value || "192.168.64.10";
+          const param =
+            dom.genParam.value || "/Users/username/Downloads/ssh-key";
+          let res = "";
+
+          if (type === "k8s-init") {
+            res = `sudo kubeadm init --apiserver-advertise-address=${ip} --pod-network-cidr=10.244.0.0/16`;
+          } else if (type === "k8s-join") {
+            res = `sudo kubeadm join ${ip}:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>`;
+          } else if (type === "swarm-create") {
+            res = `docker service create --replicas 4 --constraint "node.role==manager" alpine ping ${ip}`;
+          } else if (type === "vm-start") {
+            res = `vmrun -T fusion start "${param}" nogui`;
+          } else if (type === "ssh-connect") {
+            res = `ssh -i ${param} root@${ip}`;
+          }
+
+          dom.generatorOutputText.textContent = res;
+        }
+
+        window.toggleBookmark = function (id) {
+          const idx = state.bookmarks.indexOf(id);
+          if (idx >= 0) {
+            state.bookmarks.splice(idx, 1);
+            showToast("Removed from Bookmarks");
+          } else {
+            state.bookmarks.push(id);
+            showToast("Added to Bookmarks");
+          }
+          localStorage.setItem(
+            "devops_bookmarks",
+            JSON.stringify(state.bookmarks),
+          );
+          populateSidebarDropdowns();
+          renderCommands();
+        };
+
+        window.copyToClipboard = function (text) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast("Copied!");
+          });
+        };
+
+        function showToast(msg) {
+          dom.toastMessage.textContent = msg;
+          dom.toastNotice.classList.add("show");
+          setTimeout(() => {
+            dom.toastNotice.classList.remove("show");
+          }, 2000);
+        }
+
+        function escapeJsString(str) {
+          return str
+            .replace(/\\/g, "\\\\")
+            .replace(/`/g, "\\`")
+            .replace(/\$/g, "\\$");
+        }
+      })();
+    </script>
+  </body>
+</html>

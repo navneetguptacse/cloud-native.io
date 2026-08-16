@@ -1,0 +1,1506 @@
+{
+  "groups": [
+    {
+      "id": "k8s-multinode",
+      "name": "Kubernetes Multi-Node Cluster",
+      "description": "kubeadm, containerd, and Flannel cluster orchestration on local VMs or AWS EC2."
+    },
+    {
+      "id": "minikube-local",
+      "name": "Minikube Single-Node Cluster",
+      "description": "Local Kubernetes development environment using Docker or VM drivers."
+    },
+    {
+      "id": "docker-swarm",
+      "name": "Docker Swarm Cluster",
+      "description": "Native Docker cluster setup, service scaling, constraints, and scheduling."
+    },
+    {
+      "id": "vmware-cli",
+      "name": "VMware Fusion CLI Automation",
+      "description": "Automate virtual machine lifecycles using vmrun in headless or GUI modes."
+    },
+    {
+      "id": "ssh-setup",
+      "name": "Ubuntu Server & SSH Access",
+      "description": "Virtual machine setup, root provisioning, ed25519 SSH keys, and security hardening."
+    }
+  ],
+  "recipes": [
+    {
+      "id": "recipe-k8s-init",
+      "title": "Bootstrap Control Plane",
+      "query": "kubeadm init",
+      "groupId": "k8s-multinode"
+    },
+    {
+      "id": "recipe-minikube-start",
+      "title": "Launch Minikube (Docker)",
+      "query": "minikube start --driver=docker",
+      "groupId": "minikube-local"
+    },
+    {
+      "id": "recipe-swarm-init",
+      "title": "Init Docker Swarm",
+      "query": "docker swarm init",
+      "groupId": "docker-swarm"
+    },
+    {
+      "id": "recipe-vmrun-headless",
+      "title": "Start Headless VM",
+      "query": "vmrun -T fusion start",
+      "groupId": "vmware-cli"
+    },
+    {
+      "id": "recipe-ssh-keygen",
+      "title": "Generate Ed25519 SSH Key",
+      "query": "ssh-keygen -t ed25519",
+      "groupId": "ssh-setup"
+    },
+    {
+      "id": "recipe-flannel-cni",
+      "title": "Deploy Flannel Network",
+      "query": "flannel",
+      "groupId": "k8s-multinode"
+    }
+  ],
+  "sections": [
+    {
+      "id": "k8s-1",
+      "groupId": "k8s-multinode",
+      "title": "1. Overview & Architecture",
+      "description": "Multi-node Kubernetes cluster requirements and VPC subnet layout."
+    },
+    {
+      "id": "k8s-2",
+      "groupId": "k8s-multinode",
+      "title": "2. Local Setup Connectivity",
+      "description": "Hardware requirements, supported hypervisors, and IP connectivity tests."
+    },
+    {
+      "id": "k8s-3",
+      "groupId": "k8s-multinode",
+      "title": "3. AWS Infrastructure & Hostnames",
+      "description": "EC2 instances, security group rule (6443), SSH access, and hostname mapping."
+    },
+    {
+      "id": "k8s-4",
+      "groupId": "k8s-multinode",
+      "title": "4. Common Node Configuration",
+      "description": "Package updates, containerd cgroup setup, repository keys, and swap disabling."
+    },
+    {
+      "id": "k8s-5",
+      "groupId": "k8s-multinode",
+      "title": "5. Control Plane Initialization",
+      "description": "kubeadm init, kubectl admin config, Flannel CNI, and join token generation."
+    },
+    {
+      "id": "k8s-6",
+      "groupId": "k8s-multinode",
+      "title": "6. Worker Node Join",
+      "description": "Node reset commands and joining worker nodes to the control plane."
+    },
+    {
+      "id": "k8s-7",
+      "groupId": "k8s-multinode",
+      "title": "7. Cluster Verification",
+      "description": "Verifying control plane and worker node status."
+    },
+    {
+      "id": "k8s-8",
+      "groupId": "k8s-multinode",
+      "title": "8. Kubernetes Troubleshooting",
+      "description": "Fixing NotReady nodes, CNI reset, missing containerd, and SSH host key errors."
+    },
+    {
+      "id": "mini-1",
+      "groupId": "minikube-local",
+      "title": "1. Overview & Prerequisites",
+      "description": "Minikube architecture and checking Docker / kubectl dependencies."
+    },
+    {
+      "id": "mini-2",
+      "groupId": "minikube-local",
+      "title": "2. Start Minikube Cluster",
+      "description": "Launching local cluster with default or Docker driver."
+    },
+    {
+      "id": "mini-3",
+      "groupId": "minikube-local",
+      "title": "3. Verification & kubectl Basics",
+      "description": "Inspecting nodes, pods, and API server communication model."
+    },
+    {
+      "id": "mini-4",
+      "groupId": "minikube-local",
+      "title": "4. Networking & App Access",
+      "description": "Retrieving cluster IP and exposing deployments with NodePort."
+    },
+    {
+      "id": "mini-5",
+      "groupId": "minikube-local",
+      "title": "5. Node Access & Web Dashboard",
+      "description": "Minikube SSH access and enabling the Kubernetes web dashboard."
+    },
+    {
+      "id": "mini-6",
+      "groupId": "minikube-local",
+      "title": "6. Cluster Lifecycle & Stop",
+      "description": "Stopping local cluster and reference links."
+    },
+    {
+      "id": "swarm-1",
+      "groupId": "docker-swarm",
+      "title": "1. Swarm Architecture & Prerequisites",
+      "description": "Multi-node manager and worker topology requirements."
+    },
+    {
+      "id": "swarm-2",
+      "groupId": "docker-swarm",
+      "title": "2. Swarm Initialization & Joining",
+      "description": "Initializing swarm leader and joining worker or manager nodes."
+    },
+    {
+      "id": "swarm-3",
+      "groupId": "docker-swarm",
+      "title": "3. Node Management & Roles",
+      "description": "Listing nodes, demoting managers, promoting workers, and node removal."
+    },
+    {
+      "id": "swarm-4",
+      "groupId": "docker-swarm",
+      "title": "4. Service Management & Scaling",
+      "description": "Creating services, viewing tasks/logs, scaling replicas, and mode toggles."
+    },
+    {
+      "id": "swarm-5",
+      "groupId": "docker-swarm",
+      "title": "5. Constraints, Labels & Failure Handling",
+      "description": "Manager constraints, node labels, daemon configs, and self-healing behavior."
+    },
+    {
+      "id": "swarm-6",
+      "groupId": "docker-swarm",
+      "title": "6. Swarm Troubleshooting",
+      "description": "Resolving down nodes, unhandled leaves, and inspect logs."
+    },
+    {
+      "id": "vm-1",
+      "groupId": "vmware-cli",
+      "title": "1. vmrun CLI & Prerequisites",
+      "description": "VMware Fusion command line interface verification and absolute paths."
+    },
+    {
+      "id": "vm-2",
+      "groupId": "vmware-cli",
+      "title": "2. Start & Stop Operations",
+      "description": "Launching VMs in headless/GUI mode and performing soft/hard shutdowns."
+    },
+    {
+      "id": "vm-3",
+      "groupId": "vmware-cli",
+      "title": "3. Lifecycle & Pause Commands",
+      "description": "Resetting, pausing, resuming, and listing active running VMs."
+    },
+    {
+      "id": "vm-4",
+      "groupId": "vmware-cli",
+      "title": "4. Batch Automation Scripts",
+      "description": "Automated script loops for stopping all running virtual machines."
+    },
+    {
+      "id": "ssh-1",
+      "groupId": "ssh-setup",
+      "title": "1. VM Creation & Package Updates",
+      "description": "Downloading Ubuntu ISO, provisioning hardware, and updating packages."
+    },
+    {
+      "id": "ssh-2",
+      "groupId": "ssh-setup",
+      "title": "2. Password & Root Access Setup",
+      "description": "Configuring root password, enabling temporary root SSH, and finding IP address."
+    },
+    {
+      "id": "ssh-3",
+      "groupId": "ssh-setup",
+      "title": "3. Key Pair Generation & Deployment",
+      "description": "Creating ed25519 key pair, copying public key, and setting strict file permissions."
+    },
+    {
+      "id": "ssh-4",
+      "groupId": "ssh-setup",
+      "title": "4. Key Authentication Hardening",
+      "description": "Disabling password authentication and forcing public key SSH access."
+    },
+    {
+      "id": "ssh-5",
+      "groupId": "ssh-setup",
+      "title": "5. SSH Troubleshooting",
+      "description": "Checking SSH service status, config syntax, and key permissions."
+    }
+  ],
+  "commands": [
+    {
+      "id": "cmd-k8s-ping",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-2",
+      "title": "Test Local VM Connectivity",
+      "command": "ping <node-ip>",
+      "description": "Verify private network connectivity between master and worker nodes.",
+      "tags": [
+        "network",
+        "ping",
+        "connectivity"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ping</span> <span class=\"token-param\">&lt;node-ip&gt;</span>"
+    },
+    {
+      "id": "cmd-k8s-ssh-ec2",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-3",
+      "title": "SSH into AWS EC2 Node",
+      "command": "ssh -i <key.pem> ubuntu@<public-ip>",
+      "description": "Connect to remote AWS EC2 Ubuntu instance using SSH private key.",
+      "tags": [
+        "aws",
+        "ec2",
+        "ssh"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh</span> <span class=\"token-flag\">-i</span> <span class=\"token-var\">&lt;key.pem&gt;</span> <span class=\"token-param\">ubuntu@&lt;public-ip&gt;</span>"
+    },
+    {
+      "id": "cmd-k8s-hostname-master",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-3",
+      "title": "Set Master Hostname",
+      "command": "sudo hostnamectl set-hostname master01",
+      "description": "Set system hostname to master01 on control plane instance.",
+      "tags": [
+        "hostname",
+        "master",
+        "systemd"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo hostnamectl</span> <span class=\"token-param\">set-hostname master01</span>"
+    },
+    {
+      "id": "cmd-k8s-hostname-worker1",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-3",
+      "title": "Set Worker 1 Hostname",
+      "command": "sudo hostnamectl set-hostname worker01",
+      "description": "Set system hostname to worker01 on first worker instance.",
+      "tags": [
+        "hostname",
+        "worker",
+        "systemd"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo hostnamectl</span> <span class=\"token-param\">set-hostname worker01</span>"
+    },
+    {
+      "id": "cmd-k8s-hostname-worker2",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-3",
+      "title": "Set Worker 2 Hostname",
+      "command": "sudo hostnamectl set-hostname worker02",
+      "description": "Set system hostname to worker02 on second worker instance.",
+      "tags": [
+        "hostname",
+        "worker",
+        "systemd"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo hostnamectl</span> <span class=\"token-param\">set-hostname worker02</span>"
+    },
+    {
+      "id": "cmd-k8s-etc-hosts",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-3",
+      "title": "Configure Hosts Resolution File",
+      "command": "sudo nano /etc/hosts",
+      "description": "Edit /etc/hosts to bind master01, worker01, and worker02 private IPs.",
+      "tags": [
+        "hosts",
+        "dns",
+        "networking"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo nano</span> <span class=\"token-param\">/etc/hosts</span>"
+    },
+    {
+      "id": "cmd-k8s-apt-update",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Update System Package Index",
+      "command": "sudo apt-get update && sudo apt-get install -y apt-transport-https curl",
+      "description": "Update package repository index and install prerequisite tools.",
+      "tags": [
+        "apt",
+        "dependencies",
+        "ubuntu"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo apt-get</span> update <span class=\"token-cmd\">&amp;&amp; sudo apt-get</span> install <span class=\"token-flag\">-y</span> apt-transport-https curl"
+    },
+    {
+      "id": "cmd-k8s-install-containerd",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Install containerd Runtime",
+      "command": "sudo apt-get install -y containerd",
+      "description": "Install containerd container runtime package across all nodes.",
+      "tags": [
+        "containerd",
+        "runtime",
+        "apt"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo apt-get</span> install <span class=\"token-flag\">-y</span> containerd"
+    },
+    {
+      "id": "cmd-k8s-config-containerd",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Generate Default containerd Configuration",
+      "command": "sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml",
+      "description": "Generate standard containerd configuration file to /etc/containerd/config.toml.",
+      "tags": [
+        "containerd",
+        "config",
+        "toml"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo mkdir</span> <span class=\"token-flag\">-p</span> /etc/containerd <span class=\"token-cmd\">&amp;&amp; containerd config default</span> | <span class=\"token-cmd\">sudo tee</span> /etc/containerd/config.toml"
+    },
+    {
+      "id": "cmd-k8s-systemd-cgroup",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Enable Systemd Cgroup Driver",
+      "command": "sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml",
+      "description": "Configure containerd to use systemd cgroup driver.",
+      "tags": [
+        "cgroup",
+        "containerd",
+        "sed"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo sed</span> <span class=\"token-flag\">-i</span> <span class=\"token-var\">'s/SystemdCgroup = false/SystemdCgroup = true/'</span> /etc/containerd/config.toml"
+    },
+    {
+      "id": "cmd-k8s-restart-containerd",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Restart containerd Daemon",
+      "command": "sudo systemctl restart containerd && sudo systemctl enable containerd",
+      "description": "Restart and enable containerd service on boot.",
+      "tags": [
+        "systemctl",
+        "containerd",
+        "service"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo systemctl</span> restart containerd <span class=\"token-cmd\">&amp;&amp; sudo systemctl</span> enable containerd"
+    },
+    {
+      "id": "cmd-k8s-gpg-key",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Add Kubernetes Package GPG Key",
+      "command": "sudo mkdir -p /etc/apt/keyrings && curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg",
+      "description": "Download and dearmor official Kubernetes v1.30 APT repository signing key.",
+      "tags": [
+        "gpg",
+        "apt",
+        "k8s-repo"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">curl</span> <span class=\"token-flag\">-fsSL</span> https://pkgs.k8s.io/... | <span class=\"token-cmd\">sudo gpg</span> <span class=\"token-flag\">--dearmor</span> <span class=\"token-flag\">-o</span> /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+    },
+    {
+      "id": "cmd-k8s-apt-repo",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Add Kubernetes APT Repository",
+      "command": "echo \"deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /\" | sudo tee /etc/apt/sources.list.d/kubernetes.list",
+      "description": "Add official Kubernetes v1.30 repository source to APT lists.",
+      "tags": [
+        "apt",
+        "repository",
+        "sources"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">echo</span> <span class=\"token-var\">\"deb [signed-by=...] https://pkgs.k8s.io/...\"</span> | <span class=\"token-cmd\">sudo tee</span> /etc/apt/sources.list.d/kubernetes.list"
+    },
+    {
+      "id": "cmd-k8s-install-tools",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Install K8s Components & Hold Version",
+      "command": "sudo apt-get update && sudo apt-get install -y kubelet kubeadm kubectl && sudo apt-mark hold kubelet kubeadm kubectl",
+      "description": "Install kubelet, kubeadm, kubectl and lock versions to prevent accidental upgrades.",
+      "tags": [
+        "kubeadm",
+        "kubectl",
+        "kubelet",
+        "hold"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo apt-get</span> install <span class=\"token-flag\">-y</span> kubelet kubeadm kubectl <span class=\"token-cmd\">&amp;&amp; sudo apt-mark</span> hold kubelet kubeadm kubectl"
+    },
+    {
+      "id": "cmd-k8s-enable-kubelet",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Enable Kubelet Service",
+      "command": "sudo systemctl enable --now kubelet",
+      "description": "Enable and immediately start kubelet service.",
+      "tags": [
+        "kubelet",
+        "systemctl",
+        "service"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo systemctl</span> enable <span class=\"token-flag\">--now</span> kubelet"
+    },
+    {
+      "id": "cmd-k8s-disable-swap",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Disable Swap Space",
+      "command": "sudo swapoff -a && sudo sed -i '/swap/d' /etc/fstab",
+      "description": "Disable active swap and remove swap entries from /etc/fstab for Kubernetes compliance.",
+      "tags": [
+        "swap",
+        "fstab",
+        "memory"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo swapoff</span> <span class=\"token-flag\">-a</span> <span class=\"token-cmd\">&amp;&amp; sudo sed</span> <span class=\"token-flag\">-i</span> <span class=\"token-var\">'/swap/d'</span> /etc/fstab"
+    },
+    {
+      "id": "cmd-k8s-networking-sysctl",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-4",
+      "title": "Enable Kernel Bridging & IP Forwarding",
+      "command": "sudo modprobe br_netfilter && sudo sysctl -w net.ipv4.ip_forward=1",
+      "description": "Load netfilter bridge module and enable IPv4 forwarding for pod communication.",
+      "tags": [
+        "sysctl",
+        "kernel",
+        "networking"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo modprobe</span> br_netfilter <span class=\"token-cmd\">&amp;&amp; sudo sysctl</span> <span class=\"token-flag\">-w</span> net.ipv4.ip_forward=1"
+    },
+    {
+      "id": "cmd-k8s-init-cluster",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-5",
+      "title": "Initialize Kubernetes Cluster",
+      "command": "sudo kubeadm init --apiserver-advertise-address=<MASTER-IP> --pod-network-cidr=10.244.0.0/16",
+      "description": "Initialize control plane with advertised master IP and Flannel CIDR.",
+      "tags": [
+        "kubeadm",
+        "init",
+        "control-plane"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo kubeadm</span> init <span class=\"token-flag\">--apiserver-advertise-address</span>=<span class=\"token-param\">&lt;MASTER-IP&gt;</span> <span class=\"token-flag\">--pod-network-cidr</span>=10.244.0.0/16"
+    },
+    {
+      "id": "cmd-k8s-kubectl-config",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-5",
+      "title": "Configure User kubectl Credentials",
+      "command": "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config",
+      "description": "Copy admin kubeconfig to user home directory with proper ownership permissions.",
+      "tags": [
+        "kubeconfig",
+        "kubectl",
+        "auth"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">mkdir</span> <span class=\"token-flag\">-p</span> $HOME/.kube <span class=\"token-cmd\">&amp;&amp; sudo cp</span> <span class=\"token-flag\">-i</span> /etc/kubernetes/admin.conf $HOME/.kube/config"
+    },
+    {
+      "id": "cmd-k8s-apply-flannel",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-5",
+      "title": "Deploy Flannel CNI Plugin",
+      "command": "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml",
+      "description": "Apply official Flannel Pod Network manifest to cluster.",
+      "tags": [
+        "flannel",
+        "cni",
+        "networking"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> apply <span class=\"token-flag\">-f</span> https://github.com/flannel-io/flannel/.../kube-flannel.yml"
+    },
+    {
+      "id": "cmd-k8s-get-pods-all",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-5",
+      "title": "Verify Control Plane Pods",
+      "command": "kubectl get pods -A",
+      "description": "List all pods across all namespaces to confirm control plane components are running.",
+      "tags": [
+        "kubectl",
+        "pods",
+        "namespaces"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> get pods <span class=\"token-flag\">-A</span>"
+    },
+    {
+      "id": "cmd-k8s-print-join",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-5",
+      "title": "Generate Worker Join Command",
+      "command": "kubeadm token create --print-join-command",
+      "description": "Create a fresh join token and print complete worker join command string.",
+      "tags": [
+        "token",
+        "join",
+        "kubeadm"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubeadm</span> token create <span class=\"token-flag\">--print-join-command</span>"
+    },
+    {
+      "id": "cmd-k8s-worker-reset",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-6",
+      "title": "Reset Node State (Clean Rejoin)",
+      "command": "sudo kubeadm reset -f && sudo rm -rf /etc/kubernetes/ $HOME/.kube /etc/cni/net.d && sudo systemctl restart containerd",
+      "description": "Force reset kubeadm configuration, clear CNI directories, and restart containerd.",
+      "tags": [
+        "reset",
+        "worker",
+        "clean"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo kubeadm</span> reset <span class=\"token-flag\">-f</span> <span class=\"token-cmd\">&amp;&amp; sudo rm</span> <span class=\"token-flag\">-rf</span> /etc/kubernetes/ ... <span class=\"token-cmd\">&amp;&amp; sudo systemctl</span> restart containerd"
+    },
+    {
+      "id": "cmd-k8s-worker-join",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-6",
+      "title": "Join Worker Node to Cluster",
+      "command": "sudo kubeadm join <MASTER-IP>:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>",
+      "description": "Execute join command on worker node to register with master control plane.",
+      "tags": [
+        "join",
+        "worker",
+        "cluster"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo kubeadm</span> join <span class=\"token-param\">&lt;MASTER-IP&gt;:6443</span> <span class=\"token-flag\">--token</span> <span class=\"token-var\">&lt;TOKEN&gt;</span> <span class=\"token-flag\">--discovery-token-ca-cert-hash</span> sha256:<span class=\"token-var\">&lt;HASH&gt;</span>"
+    },
+    {
+      "id": "cmd-k8s-get-nodes",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-7",
+      "title": "List All Cluster Nodes",
+      "command": "kubectl get nodes",
+      "description": "Inspect status of all registered master and worker nodes.",
+      "tags": [
+        "nodes",
+        "kubectl",
+        "status"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> get nodes"
+    },
+    {
+      "id": "cmd-k8s-fix-cni",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-8",
+      "title": "Fix NotReady Node (CNI Reset)",
+      "command": "sudo rm -rf /etc/cni/net.d && sudo systemctl restart containerd && sudo systemctl restart kubelet",
+      "description": "Clean invalid CNI network files and restart containerd + kubelet daemons.",
+      "tags": [
+        "troubleshoot",
+        "cni",
+        "restart"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo rm</span> <span class=\"token-flag\">-rf</span> /etc/cni/net.d <span class=\"token-cmd\">&amp;&amp; sudo systemctl</span> restart containerd <span class=\"token-cmd\">&amp;&amp; sudo systemctl</span> restart kubelet"
+    },
+    {
+      "id": "cmd-k8s-get-flannel-pods",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-8",
+      "title": "Inspect Flannel Pod Status",
+      "command": "kubectl get pods -n kube-flannel -o wide",
+      "description": "Check details and node placement for all Flannel CNI daemonset pods.",
+      "tags": [
+        "flannel",
+        "pods",
+        "wide"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> get pods <span class=\"token-flag\">-n</span> kube-flannel <span class=\"token-flag\">-o</span> wide"
+    },
+    {
+      "id": "cmd-k8s-restart-flannel",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-8",
+      "title": "Restart All Flannel Pods",
+      "command": "kubectl delete pod -n kube-flannel --all",
+      "description": "Force delete all Flannel pods to trigger daemonset recreation.",
+      "tags": [
+        "flannel",
+        "delete",
+        "pods"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> delete pod <span class=\"token-flag\">-n</span> kube-flannel <span class=\"token-flag\">--all</span>"
+    },
+    {
+      "id": "cmd-k8s-ssh-keygen-reset",
+      "groupId": "k8s-multinode",
+      "sectionId": "k8s-8",
+      "title": "Remove Stale SSH Host Key",
+      "command": "ssh-keygen -R <IP>",
+      "description": "Clear cached host key entry from known_hosts file when VM IP changes.",
+      "tags": [
+        "ssh",
+        "known_hosts",
+        "security"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh-keygen</span> <span class=\"token-flag\">-R</span> <span class=\"token-param\">&lt;IP&gt;</span>"
+    },
+    {
+      "id": "cmd-mini-check-deps",
+      "groupId": "minikube-local",
+      "sectionId": "mini-1",
+      "title": "Verify Minikube Prerequisites",
+      "command": "docker --version && kubectl version --client",
+      "description": "Verify local installation of Docker daemon and kubectl client CLI.",
+      "tags": [
+        "docker",
+        "kubectl",
+        "prerequisites"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker</span> <span class=\"token-flag\">--version</span> <span class=\"token-cmd\">&amp;&amp; kubectl</span> version <span class=\"token-flag\">--client</span>"
+    },
+    {
+      "id": "cmd-mini-start-default",
+      "groupId": "minikube-local",
+      "sectionId": "mini-2",
+      "title": "Start Minikube (Default Driver)",
+      "command": "minikube start",
+      "description": "Initialize local single-node cluster using autodetected driver.",
+      "tags": [
+        "minikube",
+        "start",
+        "default"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> start"
+    },
+    {
+      "id": "cmd-mini-start-docker",
+      "groupId": "minikube-local",
+      "sectionId": "mini-2",
+      "title": "Start Minikube (Docker Driver)",
+      "command": "minikube start --driver=docker",
+      "description": "Explicitly launch Minikube cluster using Docker container driver.",
+      "tags": [
+        "minikube",
+        "docker",
+        "driver"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> start <span class=\"token-flag\">--driver</span>=docker"
+    },
+    {
+      "id": "cmd-mini-get-nodes",
+      "groupId": "minikube-local",
+      "sectionId": "mini-3",
+      "title": "Check Minikube Node Status",
+      "command": "kubectl get nodes",
+      "description": "Verify minikube single-node control-plane readiness status.",
+      "tags": [
+        "minikube",
+        "kubectl",
+        "nodes"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> get nodes"
+    },
+    {
+      "id": "cmd-mini-get-pods",
+      "groupId": "minikube-local",
+      "sectionId": "mini-3",
+      "title": "Check Minikube Default Pods",
+      "command": "kubectl get pods",
+      "description": "List pods running in the default namespace.",
+      "tags": [
+        "kubectl",
+        "pods",
+        "minikube"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> get pods"
+    },
+    {
+      "id": "cmd-mini-ip",
+      "groupId": "minikube-local",
+      "sectionId": "mini-4",
+      "title": "Get Minikube Cluster IP",
+      "command": "minikube ip",
+      "description": "Retrieve IP address assigned to the Minikube virtual machine or container.",
+      "tags": [
+        "minikube",
+        "ip",
+        "networking"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> ip"
+    },
+    {
+      "id": "cmd-mini-expose",
+      "groupId": "minikube-local",
+      "sectionId": "mini-4",
+      "title": "Expose Deployment via NodePort",
+      "command": "kubectl expose deployment my-app --type=NodePort --port=80",
+      "description": "Create a NodePort service exposing deployment port 80 to external traffic.",
+      "tags": [
+        "expose",
+        "nodeport",
+        "service"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">kubectl</span> expose deployment my-app <span class=\"token-flag\">--type</span>=NodePort <span class=\"token-flag\">--port</span>=80"
+    },
+    {
+      "id": "cmd-mini-ssh",
+      "groupId": "minikube-local",
+      "sectionId": "mini-5",
+      "title": "SSH into Minikube Node",
+      "command": "minikube ssh",
+      "description": "Open direct interactive SSH shell inside the Minikube node environment.",
+      "tags": [
+        "minikube",
+        "ssh",
+        "shell"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> ssh"
+    },
+    {
+      "id": "cmd-mini-ssh-direct",
+      "groupId": "minikube-local",
+      "sectionId": "mini-5",
+      "title": "Direct SSH (VM Driver Only)",
+      "command": "ssh -i ~/.minikube/machines/minikube/id_rsa docker@$(minikube ip)",
+      "description": "Connect to VM driver instance using minikube default RSA key.",
+      "tags": [
+        "ssh",
+        "vm-driver",
+        "rsa"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh</span> <span class=\"token-flag\">-i</span> ~/.minikube/machines/minikube/id_rsa <span class=\"token-param\">docker@$(minikube ip)</span>"
+    },
+    {
+      "id": "cmd-mini-dashboard",
+      "groupId": "minikube-local",
+      "sectionId": "mini-5",
+      "title": "Launch Minikube Dashboard",
+      "command": "minikube dashboard",
+      "description": "Enable and open Kubernetes web UI dashboard in default browser.",
+      "tags": [
+        "dashboard",
+        "gui",
+        "web-ui"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> dashboard"
+    },
+    {
+      "id": "cmd-mini-dashboard-bg",
+      "groupId": "minikube-local",
+      "sectionId": "mini-5",
+      "title": "Launch Dashboard in Background Mode",
+      "command": "minikube dashboard --url &",
+      "description": "Start dashboard service without opening browser and return proxy URL.",
+      "tags": [
+        "dashboard",
+        "background",
+        "url"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> dashboard <span class=\"token-flag\">--url</span> &amp;"
+    },
+    {
+      "id": "cmd-mini-stop",
+      "groupId": "minikube-local",
+      "sectionId": "mini-6",
+      "title": "Stop Minikube Cluster",
+      "command": "minikube stop",
+      "description": "Shut down the local Minikube cluster VM/container while preserving state.",
+      "tags": [
+        "minikube",
+        "stop",
+        "shutdown"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">minikube</span> stop"
+    },
+    {
+      "id": "cmd-swarm-init",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-2",
+      "title": "Initialize Docker Swarm Leader",
+      "command": "docker swarm init",
+      "description": "Initialize Docker Swarm manager on current node and output join tokens.",
+      "tags": [
+        "swarm",
+        "init",
+        "manager"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker swarm</span> init"
+    },
+    {
+      "id": "cmd-swarm-join-worker",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-2",
+      "title": "Join Node to Swarm Cluster",
+      "command": "docker swarm join --token <TOKEN> <MANAGER-IP>:2377",
+      "description": "Join node to existing Docker Swarm cluster using join token.",
+      "tags": [
+        "swarm",
+        "join",
+        "token"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker swarm</span> join <span class=\"token-flag\">--token</span> <span class=\"token-var\">&lt;TOKEN&gt;</span> <span class=\"token-param\">&lt;MANAGER-IP&gt;:2377</span>"
+    },
+    {
+      "id": "cmd-swarm-token-worker",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-2",
+      "title": "Get Worker Join Token",
+      "command": "docker swarm join-token worker",
+      "description": "Display join command and token for adding worker nodes.",
+      "tags": [
+        "swarm",
+        "token",
+        "worker"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker swarm</span> join-token worker"
+    },
+    {
+      "id": "cmd-swarm-token-manager",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-2",
+      "title": "Get Manager Join Token",
+      "command": "docker swarm join-token manager",
+      "description": "Display join command and token for adding secondary manager nodes.",
+      "tags": [
+        "swarm",
+        "token",
+        "manager"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker swarm</span> join-token manager"
+    },
+    {
+      "id": "cmd-swarm-node-ls",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "List All Swarm Cluster Nodes",
+      "command": "docker node ls",
+      "description": "List all active nodes in the swarm along with status, availability, and roles.",
+      "tags": [
+        "nodes",
+        "ls",
+        "status"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> ls"
+    },
+    {
+      "id": "cmd-swarm-leave",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Leave Swarm Cluster (Worker)",
+      "command": "docker swarm leave",
+      "description": "Disconnect node from current Docker Swarm cluster.",
+      "tags": [
+        "leave",
+        "swarm",
+        "worker"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker swarm</span> leave"
+    },
+    {
+      "id": "cmd-swarm-node-rm",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Remove Inactive Node",
+      "command": "docker node rm <node-name>",
+      "description": "Remove inactive or left worker node entry from manager node registry.",
+      "tags": [
+        "node",
+        "rm",
+        "clean"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> rm <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-node-rm-f",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Force Remove Unreachable Node",
+      "command": "docker node rm -f <node-name>",
+      "description": "Force remove an unresponsive node from manager node state.",
+      "tags": [
+        "node",
+        "force",
+        "rm"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> rm <span class=\"token-flag\">-f</span> <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-info",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Verify Node Swarm Info",
+      "command": "docker info",
+      "description": "Display overall Docker engine status and Swarm cluster membership details.",
+      "tags": [
+        "docker",
+        "info",
+        "swarm"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker info</span>"
+    },
+    {
+      "id": "cmd-swarm-promote",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Promote Worker to Manager",
+      "command": "docker node promote <node-name>",
+      "description": "Elevate a worker node to manager role in Raft consensus cluster.",
+      "tags": [
+        "promote",
+        "manager",
+        "role"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> promote <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-demote",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-3",
+      "title": "Demote Manager to Worker",
+      "command": "docker node demote <node-name>",
+      "description": "Lower manager node role to standard worker node.",
+      "tags": [
+        "demote",
+        "worker",
+        "role"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> demote <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-service-create",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Create Replicated Swarm Service",
+      "command": "docker service create -d --replicas 4 alpine ping 192.168.64.10",
+      "description": "Create background detached service with 4 container replicas.",
+      "tags": [
+        "service",
+        "create",
+        "replicas"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> create <span class=\"token-flag\">-d</span> <span class=\"token-flag\">--replicas</span> 4 alpine ping 192.168.64.10"
+    },
+    {
+      "id": "cmd-swarm-service-ls",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "List All Swarm Services",
+      "command": "docker service ls",
+      "description": "List all active Swarm services with replica counts and image names.",
+      "tags": [
+        "service",
+        "ls",
+        "replicas"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> ls"
+    },
+    {
+      "id": "cmd-swarm-service-ps",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "View Tasks of a Service",
+      "command": "docker service ps <service-id>",
+      "description": "Display tasks (containers) for a specific service and node allocations.",
+      "tags": [
+        "service",
+        "ps",
+        "tasks"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> ps <span class=\"token-param\">&lt;service-id&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-service-inspect",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Inspect Service Specification",
+      "command": "docker service inspect <service-id>",
+      "description": "Display detailed JSON inspection structure of service configuration.",
+      "tags": [
+        "service",
+        "inspect",
+        "json"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> inspect <span class=\"token-param\">&lt;service-id&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-service-logs",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "View Service Logs",
+      "command": "docker service logs <service-id>",
+      "description": "Fetch aggregated STDOUT and STDERR log streams across service tasks.",
+      "tags": [
+        "service",
+        "logs",
+        "output"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> logs <span class=\"token-param\">&lt;service-id&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-service-rm",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Remove Swarm Service",
+      "command": "docker service rm <service-id>",
+      "description": "Delete service and terminate all associated running containers.",
+      "tags": [
+        "service",
+        "rm",
+        "delete"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> rm <span class=\"token-param\">&lt;service-id&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-scale",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Scale Service Replicas",
+      "command": "docker service scale myservice=6",
+      "description": "Scale replica count of myservice to 6 instances immediately.",
+      "tags": [
+        "scale",
+        "service",
+        "replicas"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> scale <span class=\"token-param\">myservice=6</span>"
+    },
+    {
+      "id": "cmd-swarm-scale-multi",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Scale Multiple Services Simultaneously",
+      "command": "docker service scale service1=5 service2=3",
+      "description": "Scale multiple services in a single atomic command invocation.",
+      "tags": [
+        "scale",
+        "multiple",
+        "services"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> scale <span class=\"token-param\">service1=5 service2=3</span>"
+    },
+    {
+      "id": "cmd-swarm-mode-global",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-4",
+      "title": "Deploy Global Mode Service",
+      "command": "docker service create --mode global alpine ping 8.8.8.8",
+      "description": "Deploy global service enforcing exactly one container instance per cluster node.",
+      "tags": [
+        "mode",
+        "global",
+        "daemonset"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> create <span class=\"token-flag\">--mode</span> global alpine ping 8.8.8.8"
+    },
+    {
+      "id": "cmd-swarm-constraint-manager",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-5",
+      "title": "Restrict Service to Manager Nodes",
+      "command": "docker service create --replicas 3 --constraint \"node.role==manager\" alpine ping 192.168.64.10",
+      "description": "Schedule service tasks exclusively on manager nodes using role constraints.",
+      "tags": [
+        "constraint",
+        "manager",
+        "placement"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> create <span class=\"token-flag\">--replicas</span> 3 <span class=\"token-flag\">--constraint</span> <span class=\"token-var\">\"node.role==manager\"</span> alpine ping 192.168.64.10"
+    },
+    {
+      "id": "cmd-swarm-label-add",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-5",
+      "title": "Add Custom Label to Node",
+      "command": "docker node update --label-add ssd=true <node-name>",
+      "description": "Attach metadata label ssd=true to target node for placement filtering.",
+      "tags": [
+        "node",
+        "label",
+        "update"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> update <span class=\"token-flag\">--label-add</span> <span class=\"token-var\">ssd=true</span> <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-constraint-label",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-5",
+      "title": "Schedule Service Using Node Label",
+      "command": "docker service create --constraint \"node.labels.ssd==true\" --replicas 3 alpine ping 192.168.64.10",
+      "description": "Deploy service tasks only onto nodes matching custom label ssd==true.",
+      "tags": [
+        "constraint",
+        "label",
+        "ssd"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> create <span class=\"token-flag\">--constraint</span> <span class=\"token-var\">\"node.labels.ssd==true\"</span> <span class=\"token-flag\">--replicas</span> 3 alpine ping 192.168.64.10"
+    },
+    {
+      "id": "cmd-swarm-engine-label",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-5",
+      "title": "Schedule Using Engine-Level Label",
+      "command": "docker service create --constraint \"engine.labels.user==example\" --replicas 2 alpine ping 192.168.64.8",
+      "description": "Schedule tasks based on daemon.json engine label key-value pairs.",
+      "tags": [
+        "engine",
+        "daemon",
+        "constraint"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker service</span> create <span class=\"token-flag\">--constraint</span> <span class=\"token-var\">\"engine.labels.user==example\"</span> <span class=\"token-flag\">--replicas</span> 2 alpine ping 192.168.64.8"
+    },
+    {
+      "id": "cmd-swarm-rm-container",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-5",
+      "title": "Test Self-Healing Container Recovery",
+      "command": "docker container rm -f <container-id>",
+      "description": "Kill task container manually to observe Swarm self-healing automatic recreation.",
+      "tags": [
+        "self-healing",
+        "rm",
+        "container"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker container</span> rm <span class=\"token-flag\">-f</span> <span class=\"token-param\">&lt;container-id&gt;</span>"
+    },
+    {
+      "id": "cmd-swarm-node-inspect",
+      "groupId": "docker-swarm",
+      "sectionId": "swarm-6",
+      "title": "Inspect Node Details & Diagnostics",
+      "command": "docker node inspect <node-name>",
+      "description": "Output detailed diagnostic JSON manifest for troubleshooting node errors.",
+      "tags": [
+        "inspect",
+        "node",
+        "diagnostics"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">docker node</span> inspect <span class=\"token-param\">&lt;node-name&gt;</span>"
+    },
+    {
+      "id": "cmd-vm-list-verify",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-1",
+      "title": "Verify vmrun CLI & List Running VMs",
+      "command": "vmrun -T fusion list",
+      "description": "Check that vmrun binary is functional and view count of active VMs.",
+      "tags": [
+        "vmrun",
+        "fusion",
+        "list"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion list"
+    },
+    {
+      "id": "cmd-vm-start-headless",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-2",
+      "title": "Start VM in Headless Mode (No GUI)",
+      "command": "vmrun -T fusion start \"<vmx-path>\" nogui",
+      "description": "Launch target virtual machine in background without spawning graphical desktop window.",
+      "tags": [
+        "vmrun",
+        "headless",
+        "start"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion start <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span> <span class=\"token-flag\">nogui</span>"
+    },
+    {
+      "id": "cmd-vm-start-gui",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-2",
+      "title": "Start VM with Graphical Interface",
+      "command": "vmrun -T fusion start \"<vmx-path>\"",
+      "description": "Launch target virtual machine with VMware Fusion GUI console window.",
+      "tags": [
+        "vmrun",
+        "gui",
+        "start"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion start <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span>"
+    },
+    {
+      "id": "cmd-vm-stop-soft",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-2",
+      "title": "Graceful VM Shutdown (Soft)",
+      "command": "vmrun -T fusion stop \"<vmx-path>\" soft",
+      "description": "Send graceful OS shutdown signal via VMware Tools.",
+      "tags": [
+        "vmrun",
+        "stop",
+        "soft"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion stop <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span> <span class=\"token-flag\">soft</span>"
+    },
+    {
+      "id": "cmd-vm-stop-hard",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-2",
+      "title": "Force Power Off VM (Hard)",
+      "command": "vmrun -T fusion stop \"<vmx-path>\" hard",
+      "description": "Immediately power off virtual machine (equivalent to pulling power plug).",
+      "tags": [
+        "vmrun",
+        "stop",
+        "hard"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion stop <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span> <span class=\"token-flag\">hard</span>"
+    },
+    {
+      "id": "cmd-vm-reset-soft",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-3",
+      "title": "Graceful Restart VM",
+      "command": "vmrun -T fusion reset \"<vmx-path>\" soft",
+      "description": "Send graceful OS reboot request to running virtual machine.",
+      "tags": [
+        "vmrun",
+        "reset",
+        "reboot"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion reset <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span> <span class=\"token-flag\">soft</span>"
+    },
+    {
+      "id": "cmd-vm-pause",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-3",
+      "title": "Pause Execution of Running VM",
+      "command": "vmrun -T fusion pause \"<vmx-path>\"",
+      "description": "Freeze CPU execution state of virtual machine instantly.",
+      "tags": [
+        "vmrun",
+        "pause",
+        "freeze"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion pause <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span>"
+    },
+    {
+      "id": "cmd-vm-unpause",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-3",
+      "title": "Resume Execution of Paused VM",
+      "command": "vmrun -T fusion unpause \"<vmx-path>\"",
+      "description": "Unfreeze CPU state and resume execution of paused virtual machine.",
+      "tags": [
+        "vmrun",
+        "unpause",
+        "resume"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun</span> <span class=\"token-flag\">-T</span> fusion unpause <span class=\"token-var\">\"&lt;vmx-path&gt;\"</span>"
+    },
+    {
+      "id": "cmd-vm-stop-all-script",
+      "groupId": "vmware-cli",
+      "sectionId": "vm-4",
+      "title": "Batch Stop All Running VMs",
+      "command": "vmrun -T fusion list | tail -n +2 | while read vm; do echo \"Stopping: $vm\"; vmrun -T fusion stop \"$vm\" soft; done",
+      "description": "Shell loop script to gracefully shut down every running virtual machine.",
+      "tags": [
+        "script",
+        "batch",
+        "stop-all"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">vmrun -T fusion list</span> | <span class=\"token-cmd\">tail -n +2</span> | <span class=\"token-cmd\">while read vm</span>; <span class=\"token-cmd\">do vmrun -T fusion stop</span> <span class=\"token-var\">\"$vm\"</span> soft; <span class=\"token-cmd\">done</span>"
+    },
+    {
+      "id": "cmd-ssh-update",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-1",
+      "title": "Update Ubuntu VM Packages",
+      "command": "sudo apt-get update && sudo apt-get upgrade -y",
+      "description": "Update system repository indexes and upgrade all installed OS packages.",
+      "tags": [
+        "apt",
+        "upgrade",
+        "ubuntu"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo apt-get</span> update <span class=\"token-cmd\">&amp;&amp; sudo apt-get</span> upgrade <span class=\"token-flag\">-y</span>"
+    },
+    {
+      "id": "cmd-ssh-passwd-root",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-2",
+      "title": "Set Root User Password",
+      "command": "sudo passwd root",
+      "description": "Assign local password for root user account inside virtual machine.",
+      "tags": [
+        "passwd",
+        "root",
+        "credentials"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo passwd</span> root"
+    },
+    {
+      "id": "cmd-ssh-edit-sshd",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-2",
+      "title": "Edit OpenSSH Daemon Configuration",
+      "command": "sudo vi /etc/ssh/sshd_config",
+      "description": "Modify OpenSSH daemon configuration settings.",
+      "tags": [
+        "vi",
+        "sshd_config",
+        "openssh"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo vi</span> /etc/ssh/sshd_config"
+    },
+    {
+      "id": "cmd-ssh-restart-service",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-2",
+      "title": "Restart SSH System Daemon",
+      "command": "sudo systemctl restart ssh",
+      "description": "Apply configuration changes by restarting SSH systemd service.",
+      "tags": [
+        "systemctl",
+        "ssh",
+        "restart"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sudo systemctl</span> restart ssh"
+    },
+    {
+      "id": "cmd-ssh-ip-addr",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-2",
+      "title": "Find VM IP Address",
+      "command": "ip addr",
+      "description": "Display network interfaces and active IPv4 address assigned to VM.",
+      "tags": [
+        "ip",
+        "ip-addr",
+        "network"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ip</span> addr"
+    },
+    {
+      "id": "cmd-ssh-login-password",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-2",
+      "title": "Login As Root (Password Auth)",
+      "command": "ssh root@<your-vm-ip>",
+      "description": "Connect to VM via SSH using root account password authentication.",
+      "tags": [
+        "ssh",
+        "root",
+        "password"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh</span> <span class=\"token-param\">root@&lt;your-vm-ip&gt;</span>"
+    },
+    {
+      "id": "cmd-ssh-keygen",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-3",
+      "title": "Generate Ed25519 SSH Key Pair",
+      "command": "ssh-keygen -t ed25519 -C \"your_email@example.com\"",
+      "description": "Generate modern high-security Ed25519 public/private key pair on host machine.",
+      "tags": [
+        "ssh-keygen",
+        "ed25519",
+        "keypair"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh-keygen</span> <span class=\"token-flag\">-t</span> ed25519 <span class=\"token-flag\">-C</span> <span class=\"token-var\">\"your_email@example.com\"</span>"
+    },
+    {
+      "id": "cmd-ssh-cat-keys",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-3",
+      "title": "View Generated SSH Key Contents",
+      "command": "cat /Users/username/Downloads/ssh-key && cat /Users/username/Downloads/ssh-key.pub",
+      "description": "Display private key and public key string contents in host terminal.",
+      "tags": [
+        "cat",
+        "public-key",
+        "private-key"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">cat</span> /Users/username/Downloads/ssh-key <span class=\"token-cmd\">&amp;&amp; cat</span> /Users/username/Downloads/ssh-key.pub"
+    },
+    {
+      "id": "cmd-ssh-mkdir-authorized",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-3",
+      "title": "Create Root SSH Directory & File",
+      "command": "mkdir -p /root/.ssh && vi /root/.ssh/authorized_keys",
+      "description": "Create /root/.ssh directory and open authorized_keys to paste public key string.",
+      "tags": [
+        "authorized_keys",
+        "mkdir",
+        "ssh"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">mkdir</span> <span class=\"token-flag\">-p</span> /root/.ssh <span class=\"token-cmd\">&amp;&amp; vi</span> /root/.ssh/authorized_keys"
+    },
+    {
+      "id": "cmd-ssh-chmod-permissions",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-3",
+      "title": "Set Strict File Permissions on Authorized Keys",
+      "command": "chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys",
+      "description": "Set 700 directory permissions and 600 key file permissions to pass OpenSSH security checks.",
+      "tags": [
+        "chmod",
+        "permissions",
+        "security"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">chmod</span> 700 /root/.ssh <span class=\"token-cmd\">&amp;&amp; chmod</span> 600 /root/.ssh/authorized_keys"
+    },
+    {
+      "id": "cmd-ssh-login-key",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-4",
+      "title": "Login Using Private SSH Key",
+      "command": "ssh -i <private-ssh-key-path> root@<your-vm-ip>",
+      "description": "Connect securely to target VM using private SSH key authentication.",
+      "tags": [
+        "ssh",
+        "private-key",
+        "key-auth"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">ssh</span> <span class=\"token-flag\">-i</span> <span class=\"token-var\">&lt;private-ssh-key-path&gt;</span> <span class=\"token-param\">root@&lt;your-vm-ip&gt;</span>"
+    },
+    {
+      "id": "cmd-ssh-status",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-5",
+      "title": "Check SSH Daemon Service Status",
+      "command": "systemctl status ssh",
+      "description": "Verify systemd SSH daemon operational status and active connections.",
+      "tags": [
+        "systemctl",
+        "status",
+        "ssh"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">systemctl</span> status ssh"
+    },
+    {
+      "id": "cmd-ssh-test-config",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-5",
+      "title": "Test OpenSSH Configuration Syntax",
+      "command": "sshd -t",
+      "description": "Perform non-destructive syntax check on /etc/ssh/sshd_config file.",
+      "tags": [
+        "sshd",
+        "test",
+        "syntax"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">sshd</span> <span class=\"token-flag\">-t</span>"
+    },
+    {
+      "id": "cmd-ssh-chmod-host-key",
+      "groupId": "ssh-setup",
+      "sectionId": "ssh-5",
+      "title": "Fix Insecure Private Key Permissions on Host",
+      "command": "chmod 600 <private-ssh-key-path>",
+      "description": "Set 0600 read/write permissions on private key on host machine.",
+      "tags": [
+        "chmod",
+        "private-key",
+        "host-security"
+      ],
+      "codeHighlight": "<span class=\"token-cmd\">chmod</span> 600 <span class=\"token-var\">&lt;private-ssh-key-path&gt;</span>"
+    }
+  ]
+}
